@@ -1,0 +1,19 @@
+stages:
+    - build_stage
+    - deploy_stage
+build:
+    stage: build_stage
+    script:
+        - docker --version
+        - docker build -t nodeapp .
+    tags:
+        - ec2
+        - server
+deploy:
+    stage: deploy_stage
+    script:
+        - docker stop nodeg && docker rm nodeg
+        - docker run -d --name nodeg -p 3000:3000 nodeapp
+    tags:
+        - ec2
+        - server
