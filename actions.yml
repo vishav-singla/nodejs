@@ -34,3 +34,15 @@ jobs:
       - name: Run New Container
         run: docker run -d --name nodeg -p 3000:3000 nodeapp
 
+      - name: Docker Login
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        run: docker login -u $DOCKERHUB_USERNAME -p $DOCKER_TOKEN
+
+      - name: Push Docker Image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          docker tag nodeapp $DOCKERHUB_USERNAME/nodeapp
+          docker push $DOCKERHUB_USERNAME/nodeapp
