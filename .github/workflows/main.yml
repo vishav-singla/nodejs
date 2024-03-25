@@ -2,35 +2,49 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Docker Version
-        run: docker --version
-
-      - name: Build Docker Image
-        run: docker build -t nodeapp .
+    - uses: actions/checkout@v3
+    
+    - name: Docker Version
+      run: docker --version
+      
+    - name: Build Docker Image
+      run: docker build -t nodeapp .
+      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: nodeapp
+        path: .
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Stop and Remove Old Container
-        run: |
-          docker stop nodeg || true
-          docker rm nodeg || true
-
-      - name: Run New Container
-        run: docker run -d --name nodeg -p 3000:3000 nodeapp
-
+    - uses: actions/checkout@v3
+    
+    - name: Download Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: nodeapp
+        
+    - name: Load Docker Image
+      run: docker load < nodeapp.tar
+      
+    - name: Stop and Remove Old Container
+      run: |
+        docker stop nodeg || true
+        docker rm nodeg || true
+        
+    - name: Run New Container
+      run: docker run -d --name nodeg -p 3000:3000 nodeapp
